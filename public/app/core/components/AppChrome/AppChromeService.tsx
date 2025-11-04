@@ -11,6 +11,7 @@ import { KioskMode } from 'app/types/dashboard';
 import { RouteDescriptor } from '../../navigation/types';
 
 import { ReturnToPreviousProps } from './ReturnToPrevious/ReturnToPrevious';
+import { contextSrv } from 'app/core/services/context_srv';
 
 export interface AppChromeState {
   chromeless?: boolean;
@@ -180,13 +181,27 @@ export class AppChromeService {
   public setKioskModeFromUrl(kiosk: UrlQueryValue) {
     let newKioskMode: KioskMode | undefined;
 
-    switch (kiosk) {
-      case '1':
-      case true:
-        newKioskMode = KioskMode.Full;
+    if (contextSrv.isSignedIn) {
+      switch (kiosk) {
+        case '1':
+        case true:
+          newKioskMode = KioskMode.Full;
+          break;
+        default:
+          newKioskMode = undefined;
+      }
+    } else {
+      switch (kiosk) {
+        case '0':
+        case false:
+          newKioskMode = undefined;
+          break;
+        default:
+          newKioskMode = KioskMode.Full;
+      }
     }
 
-    if (newKioskMode && newKioskMode !== this.state.getValue().kioskMode) {
+    if (newKioskMode !== this.state.getValue().kioskMode) {
       this.update({ kioskMode: newKioskMode });
     }
   }
